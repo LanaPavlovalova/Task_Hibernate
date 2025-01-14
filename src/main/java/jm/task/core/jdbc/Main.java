@@ -3,43 +3,44 @@ package jm.task.core.jdbc;
 import java.util.List;
 
 import jm.task.core.jdbc.dao.UserDao;
+import jm.task.core.jdbc.dao.UserDaoHibernateImpl;
 import jm.task.core.jdbc.dao.UserDaoJDBCImpl;
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.service.UserService;
 import jm.task.core.jdbc.service.UserServiceImpl;
+import jm.task.core.jdbc.util.Util;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
 
 public class Main {
     public static void main(String[] args) {
-        UserService userService = new UserServiceImpl();
+        UserDaoHibernateImpl userDaoHibernate = new UserDaoHibernateImpl();
 
-        UserDao userDao = new UserDaoJDBCImpl();
-        UserService userServiceWithDI = new UserServiceImpl(userDao);
 
-        // Создал табличку
-        userService.createUsersTable();
+        // Создание таблицы
+        userDaoHibernate.createUsersTable();
 
-        // Создаю 4 юзера
-        User user1 = new User(1L, "Name1", "LastName1", (byte) 30);
-        User user2 = new User(2L, "Name2", "LastName2", (byte) 25);
-        User user3 = new User(3L, "Name3", "LastName3", (byte) 40);
-        User user4 = new User(4L, "Name4", "LastName4", (byte) 35);
+        // Сохранение и вывод созданного юзера
+        userDaoHibernate.saveUser("Name1", "LastName1", (byte) 30);
+        userDaoHibernate.saveUser("Name2", "LastName2", (byte) 25);
+        userDaoHibernate.saveUser("Name3", "LastName3", (byte) 40);
+        userDaoHibernate.saveUser("Name4", "LastName4", (byte) 35);
 
-        // Сохраняю и вывожу созданного юзера
-        userService.saveUser(user1);
-        userService.saveUser(user2);
-        userService.saveUser(user3);
-        userService.saveUser(user4);
-
-        // Вывожу всех юзеров
-        List<User> users = userService.getAllUsers();
+        // Вывод всех юзеров
+        List<User> users = userDaoHibernate.getAllUsers();
         for (User user : users) {
             System.out.println(user);
         }
 
-        // Удалил всех юзеров (Очистка таблицы)
-        userService.cleanUsersTable();
+        userDaoHibernate.removeUserById(1);
 
-        // Удаляю таблицу совсем ('дропаю' таблицу)
-        userService.dropUsersTable();
+        // Удаление всех юзеров
+        userDaoHibernate.cleanUsersTable();
+
+        // Удаление таблицы совсем
+        userDaoHibernate.dropUsersTable();
+
+        Util.shutdown();
     }
 }
